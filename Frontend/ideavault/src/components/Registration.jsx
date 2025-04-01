@@ -1,26 +1,68 @@
-import { useState } from "react";
+import { useEffect,useState } from "react";
 
-function Registration() {
+function Registration() { 
   const [formData, setFormData] = useState({
-    name: "",
+    studentName: "",
     urn: "",
-    email: "",
+    collegeEmail: "",
     batch: "A",
     projectName: "",
     projectDescription: "",
   });
 
-  const handleSubmit = (ev) => {
+  // const [error, setError] = useState(""); 
+  const [fieldErrors, setFieldErrors] = useState(""); 
+  const [successMessage, setSuccessMessage] = useState(""); 
+  // let isError = false; 
+   useEffect(() => {
+     if (fieldErrors || successMessage) {
+       const timer = setTimeout(() => {
+         setFieldErrors("");
+         setSuccessMessage("");
+       }, 2000); // 2 seconds
+
+       return () => clearTimeout(timer); // Cleanup function to clear timeout if component re-renders
+     }
+   }, [fieldErrors, successMessage]);
+
+  const handleSubmit = async (ev) => {
+    ev.preventDefault();
     console.log(ev.target.value);
     console.log(formData);
-    setFormData({
-      name: "",
-      urn: "",
-      email: "",
-      batch: "A",
-      projectName: "",
-      projectDescription: "",
-    });
+    try {
+      const response = await fetch(
+        "https://projectport-production.up.railway.app/api/projects/register",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(formData),
+        }
+      );
+      
+      if (!response.ok) {
+        throw new Error("Failed to register");
+      }
+
+      const data = await response.json();
+      console.log("Registration Successful");
+      setSuccessMessage("Registration Successful!");
+      console.log("API Response", data);
+      // isError = false
+      setFormData({
+        studentName: "",
+        urn: "",
+        collegeEmail: "",
+        batch: "A",
+        projectName: "",
+        projectDescription: "",
+      });
+    } catch (err) {
+      console.log("Error:", err);
+      setFieldErrors(`${err}`);
+      // isError = true;
+    }
   };
 
   const handleChange = (ev) => {
@@ -28,7 +70,7 @@ function Registration() {
   };
 
   return (
-    <div className="h-screen flex items-center justify-center bg-gray-100">
+    <div className="playfair-display h-screen flex items-center justify-center bg-gray-100">
       <div className="bg-white flex-col justify-center p-8 rounded-lg shadow-lg w-96">
         <h2 className="text-2xl text-center font-bold text-blue-600">
           Register
@@ -39,8 +81,8 @@ function Registration() {
             <input
               type="text"
               placeholder="Enter your name"
-              name="name"
-              value={formData.name}
+              name="studentName"
+              value={formData.studentName}
               onChange={handleChange}
               className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
               required
@@ -65,8 +107,8 @@ function Registration() {
             <input
               type="email"
               placeholder="abc.xyz@adypu.edu.in"
-              name="email"
-              value={formData.email}
+              name="collegeEmail"
+              value={formData.collegeEmail}
               onChange={handleChange}
               className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
               required
@@ -116,10 +158,13 @@ function Registration() {
           </div>
           <button
             type="submit"
-            className="w-full bg-blue-600 text-white rounded-lg py-2.5 hover:bg-blue-700">
+            className="w-full bg-blue-600 text-white rounded-lg py-2.5 hover:bg-blue-700"
+          >
             Submit
           </button>
         </form>
+        {fieldErrors && <p className="text-red-500">{fieldErrors}</p>}
+        {successMessage && <p className="text-green-500">{successMessage}</p>}
       </div>
     </div>
   );

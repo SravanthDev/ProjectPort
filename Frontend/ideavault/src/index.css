@@ -1,8 +1,15 @@
 @import "tailwindcss";
 
-body {
-  height: 100%;
-  margin: 0;
-  padding: 0;
-  overflow: hidden;
+html, body {
+  height: auto;
+  min-height: 100vh;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+.playfair-display{
+  font-family: "Playfair Display", serif;
+  font-optical-sizing: auto;
+  font-weight: normal;
+  font-style: normal;
 }
